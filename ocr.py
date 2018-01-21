@@ -9,6 +9,7 @@ import pytesseract
 from PIL import ImageFilter
 from aip import AipOcr
 import io
+import time
 import base64
 from colorama import init, Fore
 import config
@@ -174,6 +175,8 @@ def ocr_img_baidu(image):
     region_config = config_['region']
     combine_region = region_config['combine_region']
     region_im = image.crop((combine_region[0], combine_region[1], combine_region[2], combine_region[3]))
+    if config_['is_debug']:
+        region_im.show()
     # 转化为灰度图
     # region_im = region_im.convert('L')
 
@@ -218,8 +221,9 @@ if __name__ == '__main__':
     # print(question)
     # print(choices)
     # print()
-
+    time1 = time.time()
     question, choices = ocr_img_baidu(image)
+    print('ocr time is:' + str(time.time() - time1))
     print("baidu 识别结果:")
     print(question)
     print(choices)
