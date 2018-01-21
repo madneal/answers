@@ -11,7 +11,7 @@ from aip import AipOcr
 import io
 import base64
 from colorama import init, Fore
-
+import config
 
 # 二值化算法
 def binarizing(img, threshold):
@@ -158,19 +158,21 @@ def ocr_img_tess(image, config):
     return question, choices
 
 
-def ocr_img_baidu(image, config):
+def ocr_img_baidu(image):
     # 百度OCR API  ，在 https://cloud.baidu.com/product/ocr 上注册新建应用即可
     """ 你的 APPID AK SK """
-    APP_ID = config.get('baidu_api', 'APP_ID')
-    API_KEY = config.get('baidu_api', 'API_KEY')
-    SECRET_KEY = config.get('baidu_api', 'SECRET_KEY')
+    config_ = config.load_config()
+    baidu_config = config_['baidu_ocr']
+    APP_ID = str(baidu_config['app_id'])
+    API_KEY = baidu_config['api_key']
+    SECRET_KEY = baidu_config['secret_key']
 
     client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
     global combine_region
     # 切割题目+选项区域，左上角坐标和右下角坐标,自行测试分辨率
-    combine_region = config.get("region", "combine_region").replace(' ', '').split(',')
-    combine_region = list(map(int, combine_region))
+    region_config = config_['region']
+    combine_region = region_config['combine_region']
     region_im = image.crop((combine_region[0], combine_region[1], combine_region[2], combine_region[3]))
     # 转化为灰度图
     # region_im = region_im.convert('L')

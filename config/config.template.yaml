@@ -1,0 +1,9 @@
+baidu_ocr:
+  app_id:
+  api_key:
+  secret_key:
+
+region:
+  question_region: [50, 350, 1000, 560]
+  choices_region: [75, 535, 1000, 1200]
+  combine_region: [50, 350, 1000, 1200]
