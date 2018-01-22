@@ -111,8 +111,8 @@ def ocr_img(image, config):
 
 def ocr_img_tess(image, config):
     """只运行一次 Tesseract"""
-
-    combine_region = config.get("region", "combine_region").replace(' ', '').split(',')
+    config_region = config['region']
+    combine_region = config_region['combine_region']
     combine_region = list(map(int, combine_region))
 
     # 切割题目+选项区域，左上角坐标和右下角坐标,自行测试分辨率
@@ -159,10 +159,9 @@ def ocr_img_tess(image, config):
     return question, choices
 
 
-def ocr_img_baidu(image):
+def ocr_img_baidu(image, config_):
     # 百度OCR API  ，在 https://cloud.baidu.com/product/ocr 上注册新建应用即可
     """ 你的 APPID AK SK """
-    config_ = config.load_config()
     baidu_config = config_['baidu_ocr']
     APP_ID = str(baidu_config['app_id'])
     API_KEY = baidu_config['api_key']
