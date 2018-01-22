@@ -10,10 +10,8 @@ import screenshot, ocr, methods
 from threading import Thread
 import time
 import configparser
+import config
 
-# 读取配置文件
-config = configparser.ConfigParser()
-config.read('./config/configure.conf', encoding='utf-8')
 
 while True:
     # 截图
@@ -32,8 +30,9 @@ while True:
     # ocr_img_baidu： 题目和选项一起截，使用 baidu ocr，需配置 key
 
     # question, choices = ocr.ocr_img(img, config)
-    question, choices = ocr.ocr_img_tess(img, config)
-    # question, choices = ocr.ocr_img_baidu(img, config)
+    config_ = config.load_config()
+    # question, choices = ocr.ocr_img_tess(img, config_)
+    question, choices = ocr.ocr_img_baidu(img, config_)
 
     # end_time2 = time.clock()
     # print(end_time2 - end_time)
