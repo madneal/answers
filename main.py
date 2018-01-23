@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-
-# @Author  : Skye
-# @Time    : 2018/1/8 20:38
-# @desc    : 答题闯关辅助，截屏 ，OCR 识别，百度搜索
-
-
 from PIL import Image
 import screenshot, ocr, methods
 from threading import Thread
 import time
-import configparser
 import config
+import re
+
+
+def filter_symbol(str):
+    return re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）《》]+'.decode('utf8'), '', str)
 
 
 while True:
@@ -33,6 +30,7 @@ while True:
     config_ = config.load_config()
     # question, choices = ocr.ocr_img_tess(img, config_)
     question, choices = ocr.ocr_img_baidu(img, config_)
+    question = filter_symbol(question)
 
     # end_time2 = time.clock()
     # print(end_time2 - end_time)
@@ -62,3 +60,5 @@ while True:
         break
 
     print('------------------------')
+
+
