@@ -14,6 +14,7 @@ import base64
 from colorama import init, Fore
 import config
 
+
 # 二值化算法
 def binarizing(img, threshold):
     pixdata = img.load()
@@ -47,28 +48,40 @@ def depoint(img):  # input: gray image
     return img
 
 
+def get_processed_img(image, region, binary_val):
+    image = image.crop(region[0], region[1], region[2], region[3])
+    image_im = image.convert('L')
+    image_im = binarizing(image_im, binary_val)
+    return image_im
+
+
+def ocr_img_tess(img, config_):
+    tesseract_config = config_['tesseract']
+    pytesseract.pytesseract.tesseract_cmd =tesseract_config['tesseract_cmd']
+
+    # 语言包目录和参数
+    tessdata_dir_config = tesseract_config['tessdata_dir_config']
+    text_arr = pytesseract.image_to_string(img, lang='chi_sim', config=tessdata_dir_config)
+    for text in text_arr:
+        text = text.replace('_', '一')
+        text = text.strip()
+    return text_arr
+
+def ocr_right_choice(image, config):
+    region = config['region']
+    choices_region = region['choices_region']
+
+
 def ocr_img(image, config):
-    question_region = config.get("region", "question_region").replace(' ', '').split(',')
-    question_region = list(map(int, question_region))
+    region = config['region']
+    question_region = region['question_region']
+    choices_region = region['choices_region']
 
-    choices_region = config.get("region", "choices_region").replace(' ', '').split(',')
-    choices_region = list(map(int, choices_region))
-
-    question_im = image.crop(
-        (question_region[0], question_region[1], question_region[2], question_region[3]))  # 坚果 pro1
-    choices_im = image.crop((choices_region[0], choices_region[1], choices_region[2], choices_region[3]))
-
-    # 边缘增强滤波,不一定适用
-    # question_im = question_im.filter(ImageFilter.EDGE_ENHANCE)
-    # choices_im = choices_im.filter(ImageFilter.EDGE_ENHANCE)
-
-    # 转化为灰度图
-    question_im = question_im.convert('L')
-    choices_im = choices_im.convert('L')
 
     # 把图片变成二值图像
-    question_im = binarizing(question_im, 190)
-    choices_im = binarizing(choices_im, 190)
+    question_im = get_processed_img(image, question_region, 190)
+    choices_im = binarizing(image, choices_region, 120)
+    choices_im.show()
 
     # question_im = question_im.convert('1')
     # choices_im = choices_im.convert('1')
@@ -79,11 +92,11 @@ def ocr_img(image, config):
 
     # win环境
     # tesseract 路径
-
-    pytesseract.pytesseract.tesseract_cmd = config.get("tesseract", "tesseract_cmd")
+    tesseract_config = config_['tesseract']
+    pytesseract.pytesseract.tesseract_cmd =tesseract_config['tesseract_cmd']
 
     # 语言包目录和参数
-    tessdata_dir_config = config.get("tesseract", "tessdata_dir_config")
+    tessdata_dir_config = tesseract_config['tessdata_dir_config']
 
     # lang 指定中文简体
     question = pytesseract.image_to_string(question_im, lang='chi_sim', config=tessdata_dir_config)
@@ -215,13 +228,9 @@ def ocr_img_baidu(image, config_):
 
 if __name__ == '__main__':
     image = Image.open("img/screenshot.png")
-    # question, choices = ocr_img(image)
-    # print("Tess 识别结果:")
-    # print(question)
-    # print(choices)
-    # print()
+    config_ = config.load_config()
     time1 = time.time()
-    question, choices = ocr_img_baidu(image)
+    question, choices = ocr_img(image, config_)
     print('ocr time is:' + str(time.time() - time1))
     print("baidu 识别结果:")
     print(question)
