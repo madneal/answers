@@ -7,7 +7,7 @@ import re
 
 
 def filter_symbol(str):
-    return re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）《》]+'.decode('utf8'), '', str)
+    return re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）《》]+', '', str)
 
 
 while True:
