@@ -1,8 +1,14 @@
 from datetime import datetime
 from elasticsearch import Elasticsearch
+from os import listdir
+import config
+import ocr
+from PIL import Image
+
 
 def initial():
     return Elasticsearch({'localhost'})
+
 
 def get_questions():
     questions = []
@@ -25,6 +31,32 @@ def write_questions_to_index():
         es.index(index='question-index', doc_type='question', id=id, body=question)
 
 
+def get_question_from_img():
+    files = listdir('img')
+    config_ = config.load_config()
+    for file in files:
+        image_path = 'img/' + file
+        img = Image.open(image_path)
+        img.show()
+        question, choices = ocr.ocr_img_baidu(img, config_)
+        print(question)
+        print(choices)
+
+
+def get_right_choice(choices, image_path):
+    result = {}
+    if len(choices) != 6:
+        print(image_path + '识别问题异常，请确保上传符合要求的图片')
+    else:
+        for i in range(choices):
+            result[choices[i]] = int(choices[i + 1])
+            i = i + 2
+        max_value = max(result.values())
+
+    print()
+
+
+
 def search_question(question):
     es = initial()
     res = es.search(index='question-index', body={
@@ -45,7 +77,8 @@ def search_question(question):
 
 
 if __name__ == '__main__':
-    write_questions_to_index()
-    result = search_question('不鸣则已的下一句')
-    for e in result:
-        print(e['_source'])
+    get_question_from_img()
+    # write_questions_to_index()
+    # result = search_question('不鸣则已的下一句')
+    # for e in result:
+    #     print(e['_source'])
