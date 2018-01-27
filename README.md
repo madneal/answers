@@ -14,3 +14,4 @@
 ## Config
 * 主要包括百度 ocr API 的相关配置以及截图区域的配置，按照 `config/config.template.yaml`来进行配置。
 
+## Run
