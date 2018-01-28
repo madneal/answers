@@ -2,8 +2,6 @@ from PIL import Image
 import pytesseract
 from aip import AipOcr
 import io
-import time
-from colorama import Fore
 import config
 
 
@@ -18,6 +16,16 @@ def binarizing(img, threshold):
             else:
                 pixdata[x, y] = 255
     return img
+
+
+def get_region(region_type, config_):
+    return config_['region'][region_type]
+
+
+def get_text(config_, region_type, image):
+    region = config_['region'][region_type]
+    img_im = get_processed_img(image, region, 190)
+    return ''.join(ocr_img_baidu(img_im, config_))
 
 
 def get_processed_img(image, region, binary_val):
@@ -40,16 +48,20 @@ def ocr_img_tess(img, config_):
     return text_arr
 
 
-def ocr_right_choice(image, config):
-    region = config['region']
+def ocr_right_choice(image, config_):
+    region = config_['region']
     choices_region = region['choices_region']
     img_all = get_processed_img(image, choices_region, 100)
     img_part = get_processed_img(image, choices_region, 175)
+    all_choices = ocr_img_baidu(img_all, config_)
+    part_choices = ocr_img_baidu(img_part, config_)
     if config_['is_debug']:
         img_all.show()
         img_part.show()
-    all_choices = ocr_img_baidu(img_all, config_)
-    part_choices = ocr_img_baidu(img_part, config_)
+        print("所有选项是：")
+        print(all_choices)
+        print("部分选项是：")
+        print(part_choices)
     right_choice = [choice for choice in all_choices if choice not in part_choices]
     return ''.join(right_choice)
 
@@ -58,8 +70,6 @@ def ocr_img(image, config):
     region = config['region']
     question_region = region['question_region']
     choices_region = region['choices_region']
-
-
     # 把图片变成二值图像
     question_im = get_processed_img(image, question_region, 190)
     choices_im = binarizing(image, choices_region, 120)
@@ -78,48 +88,28 @@ def ocr_img_baidu(image, config_):
     APP_ID = str(baidu_config['app_id'])
     API_KEY = baidu_config['api_key']
     SECRET_KEY = baidu_config['secret_key']
-
     client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
-
-    # region = config_['region']
-    # if type == 0:
-    #     region = region['combine_region']
-    # elif type == 1:
-    #     region = region['question_region']
-    # elif type == 2:
-    #     region = region['choices_region']
-    # region_im = get_processed_img(image, region, binary_val)
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format='PNG')
     image_data = img_byte_arr.getvalue()
-    # base64_data = base64.b64encode(image_data)
     response = client.basicGeneral(image_data)
-    # print(response)
     words_result = response['words_result']
 
     texts = [x['words'] for x in words_result]
     return texts
-    # if type == 0:
-    #     if len(texts) > 2:
-    #         question = texts[0]
-    #         choices = texts[1:]
-    #         choices = [x.replace(' ', '') for x in choices]
-    #     else:
-    #         print(Fore.RED + '截图区域设置错误，请重新设置' + Fore.RESET)
-    #         exit(0)
-    #
-    #     # 处理出现问题为两行或三行
-    #     if choices[0].endswith('?'):
-    #         question += choices[0]
-    #         choices.pop(0)
-    #     elif choices[1].endswith('?'):
-    #         question += choices[0]
-    #         question += choices[1]
-    #         choices.pop(0)
-    #         choices.pop(0)
-    #     return question, choices
-    # else:
-    #     return texts
+
+
+def process_texts(texts):
+    if len(texts) > 2:
+        question = texts[0]
+        choices = texts[1:]
+        choices = [x.replace(' ', '') for x in choices]
+
+    for choice_index, choice in choices:
+        if choice.endswith('?'):
+            question = question + choice
+            choices.pop(0)
+    return question, choices
 
 
 if __name__ == '__main__':
