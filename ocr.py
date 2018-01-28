@@ -98,6 +98,11 @@ def ocr_img_baidu(image, config_):
     texts = [x['words'] for x in words_result]
     return texts
 
+def get_question_and_choices(image, config_):
+    img_im = get_processed_img(image, get_region('combine_region', config_), 120)
+    texts = ocr_img_baidu(img_im, config_)
+    return process_texts(texts)
+
 
 def process_texts(texts):
     if len(texts) > 2:
@@ -105,7 +110,7 @@ def process_texts(texts):
         choices = texts[1:]
         choices = [x.replace(' ', '') for x in choices]
 
-    for choice_index, choice in choices:
+    for choice_index, choice in enumerate(choices):
         if choice.endswith('?'):
             question = question + choice
             choices.pop(0)
