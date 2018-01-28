@@ -4,7 +4,7 @@ import urllib.parse
 import re
 from bs4 import BeautifulSoup
 import time
-
+from create_question_pool import initial
 # # 颜色兼容Win 10
 from colorama import init,Fore
 init()
@@ -13,24 +13,23 @@ def open_webbrowser(question):
     webbrowser.open('https://www.google.com/search?q=' + urllib.parse.quote(question))
 
 
-def open_webbrowser_count(question,choices):
-    print('\n-- 方法2： 题目+选项搜索结果计数法 --\n')
-    print('Question: ' + question)
-    is_opsite= False
-    if '不是' in question:
-        print('**请注意此题为否定题,选计数最少的**')
-        is_opsite = True
-
-    counts = {}
-    for i in range(len(choices)):
-        # 请求
-        req = requests.get(url='https://www.google.com/search?q=' + question + choices[i])
-        content = BeautifulSoup(req.content, 'html.parser')
-        result = content.find(id='resultStats').text
-        count = re.sub(r'\D', '', result)
-        count = int(count.replace(',', ''))
-        counts[count] = choices[i]
-    output(counts, is_opsite)
+def search_question(question):
+    es = initial()
+    res = es.search(index='question-index', body={
+        "query": {
+            "match": {
+                "question": {
+                    "query": question,
+                    "minimum_should_match": "75%"
+                }
+            }
+        }
+    })
+    if res['hits']['total'] > 0:
+        for hit in res['hits']['hits']:
+            print(hit['_source']['question'] + ':' + hit['_source']['answer'])
+    else:
+       print('未搜索到类似结果')
 
 
 def output(counts, is_opsite):
@@ -53,11 +52,11 @@ def output(counts, is_opsite):
             print("{0} : {1}".format(choice, key))
 
 
-def run_algorithm(al_num, question, choices):
+def run_algorithm(al_num, question):
     if al_num == 0:
         open_webbrowser(question)
     elif al_num == 1:
-        open_webbrowser_count(question, choices)
+        search_question(question)
 
 
 if __name__ == '__main__':
