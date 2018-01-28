@@ -14,7 +14,7 @@ def get_questions(config_):
     questions_from_img = get_questions_from_img(config_)
     question_file = open('questions.txt', 'a', encoding='utf8')
     for question in questions_from_img:
-        question_file.write(question['question'] + ' ' + question['choice'])
+        question_file.write('\r\n' + question['question'] + ' ' + question['choice'])
     question_file.close()
     questions = []
     with open('questions.txt', encoding='utf8') as f:
