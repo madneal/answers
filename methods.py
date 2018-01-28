@@ -4,7 +4,7 @@ import urllib.parse
 import re
 from bs4 import BeautifulSoup
 import time
-from create_question_pool import initial
+from create_question_bank import initial
 # # 颜色兼容Win 10
 from colorama import init,Fore
 init()
