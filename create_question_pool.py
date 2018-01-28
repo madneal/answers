@@ -1,16 +1,21 @@
 from datetime import datetime
 from elasticsearch import Elasticsearch
-from os import listdir
 import config
 import ocr
 from PIL import Image
-
+from os import listdir
+from os import remove
 
 def initial():
     return Elasticsearch({'localhost'})
 
 
-def get_questions():
+def get_questions(config_):
+    questions_from_img = get_questions_from_img(config_)
+    question_file = open('questions.txt', 'a', encoding='utf8')
+    for question in questions_from_img:
+        question_file.write(question['question'] + ' ' + question['choice'])
+    question_file.close()
     questions = []
     with open('questions.txt', encoding='utf8') as f:
         lines = f.readlines()
@@ -24,23 +29,26 @@ def get_questions():
     return questions
 
 
-def write_questions_to_index():
-    questions = get_questions()
+def get_questions_from_img(config_):
+    img_path = 'img'
+    img_list = listdir(img_path)
+    questions = []
+    for img_file in img_list:
+        img_file_path = img_path + '/' + img_file
+        img = Image.open(img_file_path)
+        questions.append({
+            'question': ocr.get_text(config_, 'question_region', img),
+            'choice': ocr.ocr_right_choice(img, config_)
+        })
+        remove(img_file_path)
+    return questions
+
+
+def write_questions_to_index(config_):
+    questions = get_questions(config_)
     es = initial()
     for id, question in enumerate(questions):
         es.index(index='question-index', doc_type='question', id=id, body=question)
-
-
-def get_question_from_img():
-    files = listdir('img')
-    config_ = config.load_config()
-    for file in files:
-        image_path = 'img/' + file
-        img = Image.open(image_path)
-        img.show()
-        question, choices = ocr.ocr_img_baidu(img, config_)
-        print(question)
-        print(choices)
 
 
 def search_question(question):
@@ -63,8 +71,6 @@ def search_question(question):
 
 
 if __name__ == '__main__':
-    get_question_from_img()
-    # write_questions_to_index()
-    # result = search_question('不鸣则已的下一句')
-    # for e in result:
-    #     print(e['_source'])
+    config_ = config.load_config()
+    write_questions_to_index(config_)
+    result = search_question('不鸣则已的下一句')
