@@ -43,20 +43,6 @@ def get_question_from_img():
         print(choices)
 
 
-def get_right_choice(choices, image_path):
-    result = {}
-    if len(choices) != 6:
-        print(image_path + '识别问题异常，请确保上传符合要求的图片')
-    else:
-        for i in range(choices):
-            result[choices[i]] = int(choices[i + 1])
-            i = i + 2
-        max_value = max(result.values())
-
-    print()
-
-
-
 def search_question(question):
     es = initial()
     res = es.search(index='question-index', body={
