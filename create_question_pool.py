@@ -51,25 +51,6 @@ def write_questions_to_index(config_):
         es.index(index='question-index', doc_type='question', id=id, body=question)
 
 
-def search_question(question):
-    es = initial()
-    res = es.search(index='question-index', body={
-        "query": {
-            "match": {
-                "question": {
-                    "query": question,
-                    "minimum_should_match": "75%"
-                }
-            }
-        }
-    })
-    if res['hits']['total'] > 0:
-        for hit in res['hits']['hits']:
-            print(hit['_source']['question'] + ':' + hit['_source']['answer'])
-    else:
-       print('未搜索到类似结果')
-
-
 if __name__ == '__main__':
     config_ = config.load_config()
     write_questions_to_index(config_)
