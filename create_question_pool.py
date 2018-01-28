@@ -73,4 +73,4 @@ def search_question(question):
 if __name__ == '__main__':
     config_ = config.load_config()
     write_questions_to_index(config_)
-    result = search_question('不鸣则已的下一句')
+
