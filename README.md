@@ -29,6 +29,7 @@
 
 ## Config
 * 主要包括百度 ocr API 的相关配置以及截图区域的配置，按照 `config/config.template.yaml`来进行配置。
+* [百度 API 申请](https://cloud.baidu.com/product/ocr)
 
 ## 贡献题库方式
 有两种方式你可以贡献题库，一种是通过文本方式，另外一种是上传图片的方式。
