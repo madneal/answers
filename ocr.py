@@ -52,7 +52,7 @@ def ocr_right_choice(image, config_):
     region = config_['region']
     choices_region = region['choices_region']
     img_all = get_processed_img(image, choices_region, 100)
-    img_part = get_processed_img(image, choices_region, 175)
+    img_part = get_processed_img(image, choices_region, 180)
     all_choices = ocr_img_baidu(img_all, config_)
     part_choices = ocr_img_baidu(img_part, config_)
     if config_['is_debug']:
