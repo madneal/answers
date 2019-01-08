@@ -118,9 +118,13 @@ def process_texts(texts):
 
 
 if __name__ == '__main__':
-    image = Image.open("img/screenshot.png")
+    # image = Image.open("img/screenshot.png")
+    image = Image.open("img/pcrimg.png")
+    image = image.convert('L')
+    image = binarizing(image, 150)
     config_ = config.load_config()
-    right_choice = ocr_right_choice(image, config_)
+    # right_choice = ocr_right_choice(image, config_)
+    right_choice = ocr_img_baidu(image, config_)
     print(right_choice)
     # time1 = time.time()
     # question, choices = ocr_img(image, config_)
